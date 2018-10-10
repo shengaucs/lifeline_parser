@@ -28,22 +28,20 @@ class Story(object):
             return
 
         # 读取每一行
-        line = file.readline()    #不知道为啥，第一行总是读取失败?
+        line = file.readline()
         lines = []
         while line:
-            line = file.readline()
-
             if line[0 : 2] == line_conf.START_COMMENT: #注释行
                 print("commnet is %s" %(line))
-                continue
-
-            if line == line_conf.EMPTY_LINE :
+            elif line == line_conf.EMPTY_LINE :
                 if lines:
                     tmp_story_block = story_block.StoryBlock(lines)
                     self.story_block[tmp_story_block.get_title()] = tmp_story_block
                 lines = []
             else:
                 lines.append(line)
+                
+            line = file.readline()
 
 if __name__ == '__main__':
     pass

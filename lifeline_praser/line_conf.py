@@ -16,8 +16,8 @@ START_TITLE        = ":: "
 START_SILENTLY    = "<<silently>>"
 END_SILENTLY      = "<<endsilently>>"
 
-START_SET_PARAM   = "<<set "
-END_SET_PARAM     = ">>"
+START_SET_VAR   = "<<set "
+END_SET_VAR     = ">>"
 
 START_GOTO        = "[["
 END_GOTO          = "]]"
@@ -27,7 +27,7 @@ END_CHOICE        = ">>"
 SPLIT_CHOICE      = " | "
 START_CHOICE_ITEM = "[["
 END_CHOICE_ITEM   = "]]"
-SPLIT_CHOICE_ITEM = " |"
+SPLIT_CHOICE_ITEM = "|"
 
 
 
