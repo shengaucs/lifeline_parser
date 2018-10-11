@@ -18,6 +18,7 @@ END_SILENTLY      = "<<endsilently>>"
 
 START_SET_VAR   = "<<set "
 END_SET_VAR     = ">>"
+SPLIT_SET_VAR   = " = "
 
 START_GOTO        = "[["
 END_GOTO          = "]]"

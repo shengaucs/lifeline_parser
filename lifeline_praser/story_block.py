@@ -125,18 +125,37 @@ class ChoiceBlock(BaseBlock) :
 
 class SetVarBlock(BaseBlock):
     """设置变量块"""
-    def __init__(self) :
-        pass
-    
+    def __init__(self, line) :
+        self.var_name = ""
+        self.var_content = ""
+        start_index = line.find(line_conf.START_SET_VAR)
+        if start_index > -1:
+            start_index = start_index + len(line_conf.START_SET_VAR)
+            end_index = line.find(line_conf.END_SET_VAR, start_index)
+            content = line[start_index : end_index]
+            content_list = content.split(line_conf.SPLIT_SET_VAR)
+            if len(content_list) == 2:
+                self.var_name = content_list[0]
+                self.var_content = content_list[1]
+            else :
+                print("SetVarBlock ERROR. line = %s" %line)
+
+        super(SetVarBlock, self).__init__(line)
+
+
     def operation(self, **kwargs):
-        pass
+        if self.var_name:
+            set_function = kwargs["set_function"]
+            set_function(self.var_name, self.var_content)
 
 
 PREFIX2BLOCK = {
-    line_conf.START_BLOCK    : TitleBlock,
-    line_conf.START_GOTO     : GotoBlock,
-    line_conf.START_CHOICE   : ChoiceBlock,
-    line_conf.START_SET_VAR  : SetVarBlock,
+    line_conf.START_BLOCK     : TitleBlock,
+    line_conf.START_GOTO      : GotoBlock,
+    line_conf.START_CHOICE    : ChoiceBlock,
+    line_conf.START_SILENTLY  : SetVarBlock,
+    line_conf.START_SET_VAR   : SetVarBlock,
+    line_conf.END_SILENTLY    : SetVarBlock,
 }
 
 
@@ -152,6 +171,7 @@ class StoryBlock(BaseBlock):
                 if line.startswith(prefix) :
                     BlockType = PREFIX2BLOCK[prefix]
                     tmp_block = BlockType(line)
+                    break
 
             self.inner_block.append(tmp_block)
 
