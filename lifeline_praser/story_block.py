@@ -148,19 +148,39 @@ class SetVarBlock(BaseBlock):
             set_function = kwargs["set_function"]
             set_function(self.var_name, self.var_content)
 
-PREFIX2BLOCK = {
-    line_conf.START_BLOCK     : TitleBlock,
-    line_conf.START_GOTO      : GotoBlock,
-    line_conf.START_CHOICE    : ChoiceBlock,
-    line_conf.START_SILENTLY  : SetVarBlock,
-    line_conf.START_SET_VAR   : SetVarBlock,
-    line_conf.END_SILENTLY    : SetVarBlock,
-}
+
+class SelectItemBlock(BaseBlock):
+    """选择条件"""
+    pass
+
 
 class SelectBlock(BaseBlock):
     """选择块"""
-    def __init__(self):
+    def __init__(self, lines):
         self.sub_block = []
+        self.var_name = ""
+        self.var_content = ""
+        tmp_lines = []
+        for line in lines:
+            start_index = 0
+            if line.startswith(line_conf.START_SELECT) :
+                tmp_start_index = line.find(line_conf.START_SELECT) \
+                                  + len(line_conf.START_SELECT)
+                tmp_end_index = line.find(line_conf.END_SELECT_ITEM)
+                tmp_content = line[tmp_start_index : tmp_end_index]
+
+
+            end_index = line.find(line_conf.END_SELECT)
+            if end_index == -1:
+                end_index = len(line)
+
+            new_line = line[start_index : end_index]
+
+            if new_line :
+                tmp_lines.append(new_line)
+
+
+        self.sub_block = make_blocks(tmp_lines)
         super(SelectBlock, self).__init__("")
 
 
@@ -184,44 +204,57 @@ class SelectBlock(BaseBlock):
 
         return rtn
 
+PREFIX2BLOCK = {
+    line_conf.START_BLOCK     : TitleBlock,
+    line_conf.START_GOTO      : GotoBlock,
+    line_conf.START_CHOICE    : ChoiceBlock,
+    line_conf.START_SILENTLY  : SetVarBlock,
+    line_conf.START_SET_VAR   : SetVarBlock,
+    line_conf.END_SILENTLY    : SetVarBlock,
+}
 
+
+def make_blocks(lines) :
+    """创建块"""
+    blocks = []
+    select_lines = []
+    is_select = False
+    for line in lines:
+        tmp_block = ContentBlock(line)
+
+        if line.startswith(line_conf.START_SELECT) :
+            if line.find(line_conf.END_SELECT) == -1:
+                select_lines.append(line)
+
+        if is_select and line.find(line_conf.END_SELECT) != -1:
+            select_lines.append(line)
+            tmp_block = SelectBlock(select_lines)
+            blocks.append(tmp_block)
+            select_lines = []
+            is_select = False
+            continue
+
+        if is_select :
+            select_lines.append(line)
+            continue
+
+
+        for prefix in PREFIX2BLOCK:
+            if line.startswith(prefix) :
+                BlockType = PREFIX2BLOCK[prefix]
+                tmp_block = BlockType(line)
+                break
+
+        blocks.append(tmp_block)
+
+
+    return blocks
 
 
 class StoryBlock(BaseBlock):
     """故事块"""
     def __init__(self, lines):
-        self.inner_block = []
-
-        select_lines = []
-        is_select = False
-
-        for line in lines:
-            tmp_block = ContentBlock(line)
-
-            if line.startswith(line_conf.START_SELECT) :
-                pass
-
-            if is_select and line.find(line_conf.END_SELECT) != -1:
-                select_lines.append(line)
-                tmp_block = SelectBlock(select_lines)
-                self.inner_block.append(tmp_block)
-                select_lines = []
-                is_select = False
-                continue
-
-            if is_select :
-                select_lines.append(line)
-                continue
-
-
-            for prefix in PREFIX2BLOCK:
-                if line.startswith(prefix) :
-                    BlockType = PREFIX2BLOCK[prefix]
-                    tmp_block = BlockType(line)
-                    break
-
-            self.inner_block.append(tmp_block)
-
+        self.inner_block = make_blocks(lines)
         super(StoryBlock, self).__init__("")
 
 

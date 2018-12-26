@@ -31,7 +31,7 @@ END_CHOICE_ITEM   = "]]"
 SPLIT_CHOICE_ITEM = "|"
 
 
-START_SELECT      = "<<if"
+START_SELECT      = "<<if "
 END_SELECT        = "<<endif>>"
 START_SELECT_ITEM = ""
 END_SELECT_ITEM   = ">>"
